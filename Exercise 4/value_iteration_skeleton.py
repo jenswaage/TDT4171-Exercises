@@ -1,4 +1,5 @@
 from typing import List, Any, NamedTuple, Dict, Tuple
+import numpy as np
 
 # Key = State, Value = Reward
 reward_matrix: Dict[int, float] = {0: -0.1, 1: -0.1, 2: -0.1, 3: -0.1, 4: -0.1, 5: -1.0, 6: -0.1, 7: -1.0, 8: -0.1,
@@ -126,7 +127,34 @@ def value_iteration() -> Any:
 
     :return: The converged utility values of all states.
     """
-    # TODO: Implement the method.
+    U_new = [0 for i in range(constants.number_states)] # set up initial utilities
+    while True:
+        U = U_new.copy()
+        max_delta = 0
+        for state in range(constants.number_states):
+            max_util = -np.Inf
+            for action in moves.keys():
+                util = 0
+                for new_state in get_outcome_states(state, action):
+                    util += get_transition_probability(state, action, new_state) * U[new_state]
+                if util > max_util:
+                    max_util = util
+            U_new[state] = get_reward(state) + constants.gamma * max_util
+            delta = abs(U[state] - U_new[state])
+            if delta > max_delta:
+                max_delta = delta
+        if max_delta < constants.epsilon*(1-constants.gamma)/constants.gamma:
+            break
+    print("Utilities:")
+    board = [[0 for state in range(int(constants.number_states/4))] for state in range(int(constants.number_states/4))]
+    state = 0
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            board[row][col] = (state, U[state])
+            state += 1
+        print(f"{board[row]}")
+    print()
+    return U
 
 
 def extract_policy(value_table: Any) -> Any:
@@ -136,7 +164,24 @@ def extract_policy(value_table: Any) -> Any:
     :return: The extracted policy.
     """
     # TODO: Implement the method.
-
+    policy = [None for state in range(constants.number_states)]
+    for state in range(constants.number_states):
+        max_util = 0
+        for action in moves.keys():
+            for new_state in get_outcome_states(state, action):
+                util = get_transition_probability(state, action, new_state) * value_table[new_state]
+                if util > max_util:
+                    max_util = util
+                    policy[state] = action
+    print("Actions:")
+    board = [[0 for state in range(int(constants.number_states/4))] for state in range(int(constants.number_states/4))]
+    state = 0
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            board[row][col] = (state, policy[state])
+            state += 1
+        print(f"{board[row]}")
+    print()
 
 def main() -> None:
     """
