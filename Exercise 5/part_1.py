@@ -9,10 +9,12 @@ def preprocess(data):
     vectorizer = HashingVectorizer(stop_words='english', n_features=2**18, binary=True, norm=None)
     return vectorizer.transform(data)
 
+# Util method for storing the preprocessed data
 def store_preprocess(data, filename):
     with open(filename, 'wb') as train_data:
         pickle.dump(data, train_data)
 
+# Util methods for loading data from pickle if a preprocessed file is present, else load and preprocess
 def load_training_data():
     y_train = pickle.load(open('Data/sklearn-data.pickle', 'rb'))['y_train']
     if not os.path.exists('Data/train-data.pickle'):
@@ -32,9 +34,7 @@ def load_test_data():
     return x_test, y_test
 
 
-
-
-
+# Load data
 x_train, y_train = load_training_data()
 x_test, y_test = load_test_data()
 
